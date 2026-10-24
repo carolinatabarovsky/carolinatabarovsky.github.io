@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="noai, noimageai">
+<meta name="author" content="Carolina Tabarovsky">
+<meta name="copyright" content="© Carolina Tabarovsky. Todos los derechos reservados.">
+<title>CAROLINA TABAROVSKY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100&display=swap" rel="stylesheet">
+<style>
+  :root { --panel: 160px; --ease: 0.3s ease; }
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: #fff;
+    color: #000;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 100;
+    text-transform: uppercase;
+  }
+
+  /* Botón del menú: tres rayas finas, siempre arriba a la izquierda */
+  .menu-btn {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 40;
+    width: 40px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+  .menu-btn span { display: block; width: 22px; height: 1px; background: #000; }
+
+  /* Panel: ocupa todo el lado izquierdo */
+  .menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--panel);
+    z-index: 30;
+    padding: 64px 10px 0 28px;
+    background: #fff;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--ease), visibility 0s linear 0.3s;
+  }
+  body.open .menu {
+    transform: none;
+    visibility: visible;
+    transition: transform var(--ease);
+  }
+  .menu a {
+    display: block;
+    font-size: 11px;
+    line-height: 2.6;
+    letter-spacing: 0.14em;
+    color: #000;
+    text-decoration: none;
+  }
+  .menu a:hover,
+  .menu a[aria-current="true"] { text-decoration: underline; text-underline-offset: 4px; }
+
+  .menu-btn:focus-visible,
+  .menu a:focus-visible { outline: 1px solid #000; outline-offset: 3px; }
+
+  /* Las fotos se corren a la derecha cuando el panel está abierto */
+  .shift { transition: transform var(--ease); }
+  body.open .shift { transform: translateX(var(--panel)); }
+
+  /* Nombre (izquierda) y fecha (derecha) del proyecto: fijos, a mitad de pantalla, siempre horizontales.
+     Entran en el margen de las fotos: la letra se achica en pantallas angostas y, si hace falta, baja de línea. */
+  .cap-l, .cap-r {
+    position: fixed;
+    top: 50%;
+    z-index: 5;
+    max-width: 12vw;
+    font-size: clamp(7px, 1.3vw, 9px);
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+  .cap-l { left: 1.5vw; text-align: left; transition: transform var(--ease); }
+  .cap-r { right: 1.5vw; text-align: right; transition: opacity var(--ease); }
+  body.open .cap-l { transform: translate(var(--panel), -50%); }
+
+  .caption { display: contents; }
+
+  /* Galería: una sola columna centrada al 70% */
+  main { padding: 72px 0 0; }
+  figure { width: 70%; margin: 0 auto 8vh; }
+  figure:last-child { margin-bottom: 0; }
+  figure img { display: block; width: 100%; height: auto; }
+  html, body { touch-action: pan-x pan-y; }
+  figure img {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .ph {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    background: #f2f2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+
+  /* Nombre: no es fijo, aparece recién al llegar al final del scroll */
+  footer {
+    margin-top: 16vh;
+    padding-bottom: 48px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+
+  footer .legal { margin-top: 14px; font-size: 8px; }
+
+  /* Escritorio: con el menú abierto la fecha se oculta para no chocar con las fotos */
+  @media (min-width: 901px) {
+    body.open .cap-r { opacity: 0; }
+  }
+
+  /* Pantallas angostas: el panel se superpone en vez de empujar las fotos */
+  @media (max-width: 900px) {
+    body.open .shift { transform: none; }
+    body.open .cap-l { transform: translateY(-50%); }
+  }
+  /* Celular: nombre (izquierda) y fecha (derecha) pasan a un pie fijo abajo, con fondo blanco.
+     Desaparece al llegar al final del scroll, donde aparece el nombre de la autora. */
+  @media (max-width: 700px) {
+    .caption {
+      display: flex;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 48px;
+      padding: 0 15%;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      transition: opacity var(--ease), visibility 0s;
+    }
+    .cap-l, .cap-r,
+    body.open .cap-l, body.open .cap-r {
+      position: static;
+      transform: none;
+      max-width: none;
+      opacity: 1;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      line-height: 1;
+    }
+    body.at-end .caption { opacity: 0; visibility: hidden; transition: opacity var(--ease), visibility 0s linear 0.3s; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu, .shift, .cap-l, .cap-r { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" aria-label="Menú" aria-expanded="false" aria-controls="menu">
+  <span></span><span></span><span></span>
+</button>
+<nav class="menu" id="menu"></nav>
+
+<div class="caption">
+  <span class="cap-l" id="capTitle"></span>
+  <span class="cap-r" id="capDate"></span>
+</div>
+
+<main class="shift" id="gallery"></main>
+<footer class="shift">
+  <div>Carolina Tabarovsky</div>
+  <div class="legal" id="legal"></div>
+</footer>
+
+<script>
+  // ─── EDITÁ ACÁ ──────────────────────────────────────────────
+  // id: lo que va en la URL · title: nombre en el menú y a la izquierda de las fotos
+  // date: fecha a la derecha de las fotos
+  // folder: carpeta con las fotos de ESE proyecto.
+  // Las fotos se detectan solas: tienen que llamarse 01.jpg, 02.jpg, 03.jpg... sin saltear números.
+  // Se muestran todas las que haya, en ese orden.
+  const PROJECTS = [
+    { id: 'brighton',      title: 'Brighton',      date: 'Sep. 2025',      folder: 'fotos/brighton' },
+    { id: 'london',        title: 'London',        date: 'Oct. Nov. 2025', folder: 'fotos/london' },
+    { id: 'mendoza',       title: 'Mendoza',       date: 'May 2026',       folder: 'fotos/mendoza' },
+    { id: 'new-york-city', title: 'New York City', date: 'Feb. 2023',      folder: 'fotos/nyc' },
+    { id: 'san-sebastian', title: 'San Sebastián', date: 'Sep. 2025',      folder: 'fotos/san-sebastian' }
+  ];
+  // ────────────────────────────────────────────────────────────
+
+  const menuBtn = document.getElementById('menuBtn');
+  const menu = document.getElementById('menu');
+  const gallery = document.getElementById('gallery');
+  const capTitle = document.getElementById('capTitle');
+  const capDate = document.getElementById('capDate');
+
+  PROJECTS.forEach(p => {
+    const a = document.createElement('a');
+    a.href = '#' + p.id;
+    a.textContent = p.title;
+    a.dataset.id = p.id;
+    menu.appendChild(a);
+  });
+
+  function setMenu(open) {
+    document.body.classList.toggle('open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+  }
+  const isOpen = () => document.body.classList.contains('open');
+
+  menuBtn.addEventListener('click', e => { e.stopPropagation(); setMenu(!isOpen()); });
+  document.addEventListener('click', e => {
+    if (isOpen() && !menu.contains(e.target)) setMenu(false);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { setMenu(false); menuBtn.focus(); }
+  });
+
+  // Carga las fotos de la carpeta del proyecto: 01.jpg, 02.jpg, 03.jpg...
+  // Pide la siguiente cuando la última cargada está por aparecer en pantalla,
+  // y se detiene en el primer número que no existe.
+  let token = 0;
+  let chain = null;
+
+  function loadPhotos(project) {
+    const mine = ++token;
+    if (chain) chain.disconnect();
+    let n = 0;
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { obs.unobserve(entry.target); loadNext(); }
+      });
+    }, { rootMargin: '1200px 0px' });
+    chain = obs;
+
+    function loadNext() {
+      if (mine !== token) return;
+      n += 1;
+      const file = String(n).padStart(2, '0') + '.jpg';
+      const fig = document.createElement('figure');
+      const img = new Image();
+      img.alt = project.title + ' ' + n;
+      img.decoding = 'async';
+      img.onload = () => { if (mine === token) obs.observe(fig); };
+      img.onerror = () => {
+        if (mine !== token) return;
+        if (n === 1) {
+          // Todavía no hay fotos en la carpeta: muestra un recuadro gris con la ruta esperada
+          const ph = document.createElement('div');
+          ph.className = 'ph';
+          ph.textContent = project.folder + '/' + file;
+          img.replaceWith(ph);
+        } else {
+          fig.remove(); // se acabaron las fotos de esta carpeta
+        }
+      };
+      img.src = project.folder + '/' + file;
+      fig.appendChild(img);
+      gallery.appendChild(fig);
+    }
+
+    loadNext();
+  }
+
+  // Muestra el proyecto indicado: cambia fotos, nombre y fecha
+  function show(id) {
+    const project = PROJECTS.find(p => p.id === id) || PROJECTS[0];
+
+    menu.querySelectorAll('a').forEach(a =>
+      a.setAttribute('aria-current', String(a.dataset.id === project.id))
+    );
+    capTitle.textContent = project.title;
+    capDate.textContent = project.date;
+
+    gallery.replaceChildren();
+    loadPhotos(project);
+    window.scrollTo(0, 0);
+  }
+
+  // Click en un proyecto: se cambia directamente, sin depender de la navegación del navegador
+  menu.addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    e.preventDefault();
+    setMenu(false);
+    show(a.dataset.id);
+    try { history.replaceState(null, '', '#' + a.dataset.id); } catch (_) {}
+  });
+
+  // Aviso de copyright con el año actual
+  document.getElementById('legal').textContent =
+    '© ' + new Date().getFullYear() + ' Todos los derechos reservados';
+
+  // Protección de las fotos: sin clic derecho, sin arrastrar, sin zoom
+  const stop = e => e.preventDefault();
+  gallery.addEventListener('contextmenu', stop);
+  document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, stop));
+  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault();
+  });
+
+  // Al llegar al final (aparece el nombre), en celular se oculta el pie fijo del proyecto
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      document.body.classList.toggle('at-end', entry.isIntersecting);
+    }).observe(document.querySelector('footer'));
+  }
+
+  // Links directos (por ejemplo tusitio.com/#london) y botón "atrás"
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
+</script>
+</body>
+</html>
